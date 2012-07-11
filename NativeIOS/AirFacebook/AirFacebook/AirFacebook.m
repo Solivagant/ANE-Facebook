@@ -27,19 +27,21 @@ FREContext AirFBCtx = nil;
 
 // @see https://developers.facebook.com/docs/mobile/ios/build/
 @implementation AirFacebook
+
 @synthesize facebook;
+@synthesize dialog = dialog_;
+@synthesize request = request_;
 
-
-+(id) sharedInstance {
-    static id sharedInstance = nil;
-    if (sharedInstance == nil) {
-        sharedInstance = [[self alloc] init];
-    }
-    
+#pragma mark - Singleton
++ (AirFacebook *)sharedInstance
+{
+    static AirFacebook *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[AirFacebook alloc] init];
+    });
     return sharedInstance;
 }
-
-
 
 ///////////////////////////////////////////////////////
 // FACEBOOK LOGIN
@@ -49,6 +51,9 @@ FREContext AirFBCtx = nil;
 // @param suffix suffix used for your other apps using the same app id (i.e paid version). can be set to null
 - (void) initFacebookWithAppId:(NSString*)appId andSuffix:(NSString*)suffix andAccessToken:(NSString*)accessToken andExpirationTimestamp:(NSString*)expirationTimestamp
 {
+    self.request = [[[AirFBRequest alloc] init] autorelease];
+    self.dialog = [[[AirFBDialog alloc] init] autorelease];
+    
     if (suffix == nil)
     {
         facebook = [[Facebook alloc] initWithAppId:appId andDelegate:self];
@@ -209,33 +214,28 @@ FREContext AirFBCtx = nil;
 
 - (void)requestWithGraphPath:(NSString*)path andCallback:(NSString*)callbackName
 {
-    AirFBRequest *requestDelegate = [[AirFBRequest alloc] init];
-    [requestDelegate setName:callbackName];
-    [requestDelegate setContext:AirFBCtx];
+    [request_ setName:callbackName];
+    [request_ setContext:AirFBCtx];
     
-    
-    [facebook requestWithGraphPath:path andParams:[[[NSMutableDictionary alloc] init] autorelease] andHttpMethod:@"GET" andDelegate:requestDelegate];
+    [facebook requestWithGraphPath:path andParams:[[[NSMutableDictionary alloc] init] autorelease] andHttpMethod:@"GET" andDelegate:request_];
 }
 
 
 - (void) requestWithGraphPath:(NSString*)path andParams:(NSMutableDictionary*)params andCallback:(NSString*)callbackName
 {
-    AirFBRequest *requestDelegate = [[AirFBRequest alloc] init];
-    [requestDelegate setName:callbackName];
-    [requestDelegate setContext:AirFBCtx];
+    [request_ setName:callbackName];
+    [request_ setContext:AirFBCtx];
     
-    
-    [facebook requestWithGraphPath:path andParams:params andHttpMethod:@"GET" andDelegate:requestDelegate];
+    [facebook requestWithGraphPath:path andParams:params andHttpMethod:@"GET" andDelegate:request_];
 }
 
 
 - (void) requestWithGraphPath:(NSString*)path andParams:(NSMutableDictionary*)params andHttpMethod:(NSString*)httpMethod andCallback:(NSString*)callbackName
 {
-    AirFBRequest *requestDelegate = [[AirFBRequest alloc] init];
-    [requestDelegate setName:callbackName];
-    [requestDelegate setContext:AirFBCtx];
+    [request_ setName:callbackName];
+    [request_ setContext:AirFBCtx];
 
-    [facebook requestWithGraphPath:path andParams:params andHttpMethod:httpMethod andDelegate:requestDelegate];
+    [facebook requestWithGraphPath:path andParams:params andHttpMethod:httpMethod andDelegate:request_];
 }
 
 - (void)request:(FBRequest *)request didFailWithError:(NSError *)error
@@ -265,13 +265,11 @@ FREContext AirFBCtx = nil;
 
 - (void)dialog:(NSString *)action andParams:(NSMutableDictionary *)params andCallback:(NSString*)callbackName
 {
-    AirFBDialog *dialogDelegate = [[AirFBDialog alloc] init];
-    [dialogDelegate setName:callbackName];
-    [dialogDelegate setContext:AirFBCtx];
+    [dialog_ setName:callbackName];
+    [dialog_ setContext:AirFBCtx];
     
-    [facebook dialog:action andParams:params andDelegate:dialogDelegate];
+    [facebook dialog:action andParams:params andDelegate:dialog_];
 }
-
 
 
 

@@ -24,12 +24,8 @@
 #import "AirFBDialog.h"
 
 @interface AirFacebook : NSObject <FBSessionDelegate>
-{
-    Facebook *facebook;
-    
-}
 
-+(id) sharedInstance;
++(AirFacebook*) sharedInstance;
 
 - (void) extendAccessTokenIfNeeded;
 - (void) initFacebookWithAppId:(NSString*)appId andSuffix:(NSString*)suffix andAccessToken:(NSString*)accessToken andExpirationTimestamp:(NSString*)expirationTimestamp;
@@ -42,9 +38,10 @@
 - (void) dialog:(NSString *)action andParams:(NSMutableDictionary *)params andCallback:(NSString*)callbackName;
 - (void) login:(NSArray*)permissions;
 - (void) logout;
+
 @property (nonatomic, retain) Facebook *facebook;
-
-
+@property (nonatomic, retain) AirFBRequest *request;
+@property (nonatomic, retain) AirFBDialog *dialog;
 
 @end
 
